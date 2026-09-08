@@ -55,6 +55,8 @@ Per-task execution plans are authored at execution time, not here — before wri
 - `@WebMvcTest`: missing `event_id` → `400`; an odds value `≤ 1.0` → `400`; `outcome` outside `{1,X,2}` → `400`; unrecognized `msg_type` → `400`; malformed JSON body → `400`.
 - `@WebMvcTest`: two `settlement` requests for the same `event_id` in sequence → both `202`, both published — no rejection, no dedup.
 
+**Execution result:** Done. `mvn clean verify` — BUILD SUCCESS, 20/20 tests passing. One correction to `T02-plan.md`'s literal snippet: AssertJ's `isCloseTo(Instant, long)` doesn't exist — used `isCloseTo(Instant.now(), within(Duration.ofSeconds(5)))` instead. Branch: `feed-normalization/provider-alpha`.
+
 ---
 
 ## T03 — ProviderBeta ingestion
