@@ -11,17 +11,17 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class ProviderAlphaController {
 
-  private final ProviderAlphaMapper mapper;
+  private final ProviderAlphaFeedNormalizer normalizer;
   private final MessagePublisher messagePublisher;
 
-  public ProviderAlphaController(ProviderAlphaMapper mapper, MessagePublisher messagePublisher) {
-    this.mapper = mapper;
+  public ProviderAlphaController(ProviderAlphaFeedNormalizer normalizer, MessagePublisher messagePublisher) {
+    this.normalizer = normalizer;
     this.messagePublisher = messagePublisher;
   }
 
   @PostMapping("/provider-alpha/feed")
   public ResponseEntity<Void> ingest(@Valid @RequestBody ProviderAlphaMessage message) {
-    StandardMessage standardMessage = mapper.standardize(message);
+    StandardMessage standardMessage = normalizer.normalize(message);
     messagePublisher.publish(standardMessage);
 
     return ResponseEntity.accepted().build();

@@ -37,7 +37,7 @@ public record StandardBetSettlementMessage(
 public enum Outcome {
   HOME("1"), DRAW("X"), AWAY("2");
   @JsonValue public String code() { ... } // serializes back to "1"/"X"/"2"
-  public static Outcome fromCode(String code) { ... } // used by each provider's Mapper
+  public static Outcome fromCode(String code) { ... } // used by each provider's FeedNormalizer
 }
 
 // Jackson does not honor @JsonValue for enum Map *keys* (only plain values) — see
@@ -125,14 +125,14 @@ com.sporty
 │   ├── Outcome.java
 │   └── FeedProviderId.java
 ├── provider/
-│   ├── FeedProvider.java                       # port: StandardMessage standardize(T raw)
+│   ├── FeedNormalizer.java                     # port: StandardMessage normalize(T raw)
 │   ├── alpha/
 │   │   ├── ProviderAlphaController.java         # @PostMapping("/provider-alpha/feed")
 │   │   ├── ProviderAlphaMessage.java            # sealed interface
 │   │   ├── ProviderAlphaOddsChangeRequest.java
 │   │   ├── ProviderAlphaOdds.java
 │   │   ├── ProviderAlphaSettlementRequest.java
-│   │   └── ProviderAlphaMapper.java             # implements FeedProvider<ProviderAlphaMessage>
+│   │   └── ProviderAlphaFeedNormalizer.java     # implements FeedNormalizer<ProviderAlphaMessage>
 │   └── beta/                                    # mirrors alpha/, keyed on ProviderBetaMessage
 ├── publish/
 │   ├── MessagePublisher.java                    # port: void publish(StandardMessage)
@@ -142,9 +142,9 @@ com.sporty
 └── BetFeedUnifierApplication.java
 ```
 
-Flow: `HTTP request → Controller (@Valid @RequestBody resolves the sealed type) → Mapper.standardize(...) → MessagePublisher.publish(...) → 202 Accepted`.
+Flow: `HTTP request → Controller (@Valid @RequestBody resolves the sealed type) → FeedNormalizer.normalize(...) → MessagePublisher.publish(...) → 202 Accepted`.
 
-**Provider isolation:** `provider/alpha/*` never imports `provider/beta/*` (or vice versa) — each package only depends on its own DTOs plus `domain/`. Each `*Mapper` is a separate Spring bean, injected only into its own provider's controller. Adding a third provider means adding a new `provider/<name>/` package and wiring it into a new controller; no existing package changes.
+**Provider isolation:** `provider/alpha/*` never imports `provider/beta/*` (or vice versa) — each package only depends on its own DTOs plus `domain/`. Each `*FeedNormalizer` is a separate Spring bean, injected only into its own provider's controller. Adding a third provider means adding a new `provider/<name>/` package and wiring it into a new controller; no existing package changes.
 
 **Maven dependencies:** `spring-boot-starter-web`, `spring-boot-starter-validation`, `spring-boot-starter-test` (JUnit 5 + `MockMvc`, test scope), and `spring-boot-starter-webmvc-test` (test scope — confirmed while implementing T01: Spring Boot 4 extracted `@WebMvcTest` and related web-slice test support out of `spring-boot-starter-test` into this separate starter; the annotation itself also moved package, from `org.springframework.boot.test.autoconfigure.web.servlet` to `org.springframework.boot.webmvc.test.autoconfigure`). No persistence starter, no messaging starter, no Lombok — consistent with the decisions in `requirements.md` and the clarifications above.
 
@@ -154,11 +154,11 @@ Flow: `HTTP request → Controller (@Valid @RequestBody resolves the sealed type
 |---|---|
 | Every standardized message carries a non-blank `eventId` and a `provider` | Both standardized records require non-null `eventId`/`provider` in their canonical constructor; upstream `@NotBlank` on `event_id` prevents a blank value ever reaching the mapper |
 | Odds `> 1.0` | `@DecimalMin(value = "1.0", inclusive = false)` on every provider odds field |
-| `outcome`/`result` always normalizes to `"1"`/`"X"`/`"2"` | Provider-specific `@Pattern` restricts raw input to that provider's own allowed values; each `Mapper` performs the fixed, total mapping into `Outcome` |
+| `outcome`/`result` always normalizes to `"1"`/`"X"`/`"2"` | Provider-specific `@Pattern` restricts raw input to that provider's own allowed values; each `FeedNormalizer` performs the fixed, total mapping into `Outcome` |
 | Each provider parsed only against its own format | Two disjoint sealed interfaces (`ProviderAlphaMessage`, `ProviderBetaMessage`), one per controller; no shared request type |
 | Standardized schema is provider-agnostic | `publish/` and `MessagePublisher` only ever see `domain.StandardMessage`; provider-specific types never cross into `publish/` |
-| `market` always `"1X2"` | Hardcoded literal set by each `Mapper`; no other value is representable in the current schema |
-| `mvn clean verify` green, all tests pass | Unit tests per `Mapper` (mapping correctness, both providers) + `@WebMvcTest` slice tests per `Controller` (status codes, validation failures) cover every AC in `requirements.md` |
+| `market` always `"1X2"` | Hardcoded literal set by each `FeedNormalizer`; no other value is representable in the current schema |
+| `mvn clean verify` green, all tests pass | Unit tests per `FeedNormalizer` (mapping correctness, both providers) + `@WebMvcTest` slice tests per `Controller` (status codes, validation failures) cover every AC in `requirements.md` |
 | PR invariant: tests for changed provider mapping + README current | `tasks.md` will scope each provider's mapper + controller as its own step with its own tests |
 
 ## Out of scope (carried from `requirements.md`, unchanged)

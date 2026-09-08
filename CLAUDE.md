@@ -19,9 +19,9 @@ This is the "2 Feeds - BE Home Assignment" take-home exercise for Sporty Group; 
 src/main/java/com/sporty/
 ├── domain/           # standardized message model: StandardOddsChangeMessage, StandardBetSettlementMessage
 ├── provider/          # inbound port + one adapter package per feed provider
-│   ├── FeedProvider.java     # port: parse a provider's raw payload into a standardized message
-│   ├── alpha/                 # ProviderAlpha: controller, request DTOs, mapper (endpoint: /provider-alpha/feed)
-│   └── beta/                  # ProviderBeta: controller, request DTOs, mapper (endpoint: /provider-beta/feed)
+│   ├── FeedNormalizer.java     # port: parse a provider's raw payload into a standardized message
+│   ├── alpha/                 # ProviderAlpha: controller, request DTOs, normalizer (endpoint: /provider-alpha/feed)
+│   └── beta/                  # ProviderBeta: controller, request DTOs, normalizer (endpoint: /provider-beta/feed)
 ├── publish/           # outbound port + adapter
 │   ├── MessagePublisher.java         # port: publish(StandardMessage)
 │   └── LoggingMessagePublisher.java  # mocked queue: logs the standardized message
@@ -33,8 +33,8 @@ src/main/java/com/sporty/
 ## Architecture
 
 - Lightweight ports-and-adapters, not full hexagonal layering: each provider integration and the outbound publishing step sit behind a small interface so normalization logic never depends on Spring or on a specific provider/queue implementation.
-- Flow: `HTTP request → provider Controller → provider-specific parse+validate → provider Mapper → StandardXxxMessage → MessagePublisher.publish(...)`.
-- Provider dispatch is by fixed URL path, not a runtime registry: `/provider-alpha/feed` and `/provider-beta/feed` are separate controllers, each owning its own request DTOs and mapping to the standardized schema. Adding a third provider means adding a new controller + mapper package, without touching ProviderAlpha/ProviderBeta code.
+- Flow: `HTTP request → provider Controller → provider-specific parse+validate → provider FeedNormalizer → StandardXxxMessage → MessagePublisher.publish(...)`.
+- Provider dispatch is by fixed URL path, not a runtime registry: `/provider-alpha/feed` and `/provider-beta/feed` are separate controllers, each owning its own request DTOs and mapping to the standardized schema. Adding a third provider means adding a new controller + normalizer package, without touching ProviderAlpha/ProviderBeta code.
 - `MessagePublisher` is the single outbound seam. Its only implementation is `LoggingMessagePublisher` (SLF4J, logs the standardized message as JSON) — this is the "mocked message queue" the assignment calls for; a real broker client would be a second implementation behind the same interface.
 - Malformed/invalid provider payloads (missing `event_id`, an outcome outside {`1`,`X`,`2`}/{`home`,`draw`,`away`}, non-positive odds) fail validation at the controller/DTO boundary and are rejected with `400 Bad Request` — they are never mapped or published.
 

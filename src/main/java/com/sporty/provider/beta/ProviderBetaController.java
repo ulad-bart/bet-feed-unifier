@@ -11,17 +11,17 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class ProviderBetaController {
 
-  private final ProviderBetaMapper mapper;
+  private final ProviderBetaFeedNormalizer normalizer;
   private final MessagePublisher messagePublisher;
 
-  public ProviderBetaController(ProviderBetaMapper mapper, MessagePublisher messagePublisher) {
-    this.mapper = mapper;
+  public ProviderBetaController(ProviderBetaFeedNormalizer normalizer, MessagePublisher messagePublisher) {
+    this.normalizer = normalizer;
     this.messagePublisher = messagePublisher;
   }
 
   @PostMapping("/provider-beta/feed")
   public ResponseEntity<Void> ingest(@Valid @RequestBody ProviderBetaMessage message) {
-    StandardMessage standardMessage = mapper.standardize(message);
+    StandardMessage standardMessage = normalizer.normalize(message);
     messagePublisher.publish(standardMessage);
 
     return ResponseEntity.accepted().build();
