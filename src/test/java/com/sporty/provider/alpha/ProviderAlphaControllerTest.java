@@ -16,6 +16,7 @@ import com.sporty.domain.StandardMessage;
 import com.sporty.domain.StandardOddsChangeMessage;
 import com.sporty.publish.MessagePublisher;
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
 import org.junit.jupiter.api.Test;
@@ -23,9 +24,11 @@ import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.util.StreamUtils;
 
 @WebMvcTest(controllers = ProviderAlphaController.class)
 @Import(ProviderAlphaMapper.class)
@@ -37,17 +40,16 @@ class ProviderAlphaControllerTest {
   @MockitoBean
   private MessagePublisher messagePublisher;
 
+  private static String fixture(String fileName) throws Exception {
+    ClassPathResource resource = new ClassPathResource("provider/alpha/" + fileName);
+    return StreamUtils.copyToString(resource.getInputStream(), StandardCharsets.UTF_8);
+  }
+
   @Test
   void oddsChangeRequest_returnsAcceptedAndPublishesStandardOddsChangeMessage() throws Exception {
     mockMvc.perform(post("/provider-alpha/feed")
             .contentType(MediaType.APPLICATION_JSON)
-            .content("""
-                {
-                  "msg_type": "odds_update",
-                  "event_id": "ev123",
-                  "values": { "1": 2.0, "X": 3.1, "2": 3.8 }
-                }
-                """))
+            .content(fixture("odds-change.json")))
         .andExpect(status().isAccepted());
 
     ArgumentCaptor<StandardMessage> captor = ArgumentCaptor.forClass(StandardMessage.class);
@@ -67,13 +69,7 @@ class ProviderAlphaControllerTest {
   void settlementRequest_returnsAcceptedAndPublishesStandardBetSettlementMessage() throws Exception {
     mockMvc.perform(post("/provider-alpha/feed")
             .contentType(MediaType.APPLICATION_JSON)
-            .content("""
-                {
-                  "msg_type": "settlement",
-                  "event_id": "ev123",
-                  "outcome": "1"
-                }
-                """))
+            .content(fixture("settlement.json")))
         .andExpect(status().isAccepted());
 
     ArgumentCaptor<StandardMessage> captor = ArgumentCaptor.forClass(StandardMessage.class);
@@ -90,12 +86,7 @@ class ProviderAlphaControllerTest {
   void missingEventId_returnsBadRequestAndDoesNotPublish() throws Exception {
     mockMvc.perform(post("/provider-alpha/feed")
             .contentType(MediaType.APPLICATION_JSON)
-            .content("""
-                {
-                  "msg_type": "odds_update",
-                  "values": { "1": 2.0, "X": 3.1, "2": 3.8 }
-                }
-                """))
+            .content(fixture("missing-event-id.json")))
         .andExpect(status().isBadRequest());
 
     verifyNoInteractions(messagePublisher);
@@ -105,13 +96,7 @@ class ProviderAlphaControllerTest {
   void oddsValueNotGreaterThanOne_returnsBadRequestAndDoesNotPublish() throws Exception {
     mockMvc.perform(post("/provider-alpha/feed")
             .contentType(MediaType.APPLICATION_JSON)
-            .content("""
-                {
-                  "msg_type": "odds_update",
-                  "event_id": "ev123",
-                  "values": { "1": 1.0, "X": 3.1, "2": 3.8 }
-                }
-                """))
+            .content(fixture("odds-not-greater-than-one.json")))
         .andExpect(status().isBadRequest());
 
     verifyNoInteractions(messagePublisher);
@@ -121,13 +106,7 @@ class ProviderAlphaControllerTest {
   void outcomeOutsideAllowedValues_returnsBadRequestAndDoesNotPublish() throws Exception {
     mockMvc.perform(post("/provider-alpha/feed")
             .contentType(MediaType.APPLICATION_JSON)
-            .content("""
-                {
-                  "msg_type": "settlement",
-                  "event_id": "ev123",
-                  "outcome": "3"
-                }
-                """))
+            .content(fixture("invalid-outcome.json")))
         .andExpect(status().isBadRequest());
 
     verifyNoInteractions(messagePublisher);
@@ -137,12 +116,7 @@ class ProviderAlphaControllerTest {
   void unrecognizedMsgType_returnsBadRequestAndDoesNotPublish() throws Exception {
     mockMvc.perform(post("/provider-alpha/feed")
             .contentType(MediaType.APPLICATION_JSON)
-            .content("""
-                {
-                  "msg_type": "cancellation",
-                  "event_id": "ev123"
-                }
-                """))
+            .content(fixture("unrecognized-msg-type.json")))
         .andExpect(status().isBadRequest());
 
     verifyNoInteractions(messagePublisher);
@@ -152,7 +126,7 @@ class ProviderAlphaControllerTest {
   void malformedJsonBody_returnsBadRequestAndDoesNotPublish() throws Exception {
     mockMvc.perform(post("/provider-alpha/feed")
             .contentType(MediaType.APPLICATION_JSON)
-            .content("{not-json"))
+            .content(fixture("malformed.json")))
         .andExpect(status().isBadRequest());
 
     verifyNoInteractions(messagePublisher);
@@ -160,13 +134,7 @@ class ProviderAlphaControllerTest {
 
   @Test
   void duplicateSettlementForSameEventId_bothReturnAcceptedAndBothPublish() throws Exception {
-    String payload = """
-        {
-          "msg_type": "settlement",
-          "event_id": "ev123",
-          "outcome": "1"
-        }
-        """;
+    String payload = fixture("settlement.json");
 
     mockMvc.perform(post("/provider-alpha/feed").contentType(MediaType.APPLICATION_JSON).content(payload))
         .andExpect(status().isAccepted());
