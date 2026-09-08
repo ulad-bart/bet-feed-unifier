@@ -74,6 +74,8 @@ Per-task execution plans are authored at execution time, not here — before wri
 **Definition of Done**
 - Same shape as T02's DoD, scoped to ProviderBeta's field names (`home`/`draw`/`away`, `ODDS`/`SETTLEMENT`) and endpoint. Includes the mapper unit tests, the `@WebMvcTest` happy-path/validation/duplicate-settlement tests, and `mvn clean verify` passing.
 
+**Execution result:** Done. `mvn clean verify` — BUILD SUCCESS, 30/30 tests passing. Controller tests load payloads from `src/test/resources/provider/beta` fixtures (valid: `odds-change.json`/`settlement.json`; invalid: `missing-event-id.json`, `odds-not-greater-than-one.json`, `invalid-result.json`, `unrecognized-type.json`, `malformed.json`), matching T02's fixture-based test pattern. Branch: `feed-normalization/provider-beta`.
+
 ---
 
 ## T04 — Packaging, README, and end-to-end verification
