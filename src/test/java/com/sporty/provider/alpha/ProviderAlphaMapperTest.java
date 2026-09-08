@@ -23,6 +23,7 @@ class ProviderAlphaMapperTest {
 
     assertThat(result).isInstanceOf(StandardOddsChangeMessage.class);
     StandardOddsChangeMessage oddsChange = (StandardOddsChangeMessage) result;
+
     assertThat(oddsChange.eventId()).isEqualTo("ev123");
     assertThat(oddsChange.provider()).isEqualTo(FeedProviderId.PROVIDER_ALPHA);
     assertThat(oddsChange.market()).isEqualTo("1X2");
@@ -40,6 +41,7 @@ class ProviderAlphaMapperTest {
 
     assertThat(result).isInstanceOf(StandardBetSettlementMessage.class);
     StandardBetSettlementMessage settlement = (StandardBetSettlementMessage) result;
+
     assertThat(settlement.eventId()).isEqualTo("ev123");
     assertThat(settlement.provider()).isEqualTo(FeedProviderId.PROVIDER_ALPHA);
     assertThat(settlement.market()).isEqualTo("1X2");

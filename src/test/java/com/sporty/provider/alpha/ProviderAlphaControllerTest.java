@@ -2,11 +2,14 @@ package com.sporty.provider.alpha;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
+import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.sporty.domain.FeedProviderId;
@@ -50,6 +53,7 @@ class ProviderAlphaControllerTest {
     ArgumentCaptor<StandardMessage> captor = ArgumentCaptor.forClass(StandardMessage.class);
     verify(messagePublisher).publish(captor.capture());
     StandardOddsChangeMessage published = (StandardOddsChangeMessage) captor.getValue();
+
     assertThat(published.eventId()).isEqualTo("ev123");
     assertThat(published.provider()).isEqualTo(FeedProviderId.PROVIDER_ALPHA);
     assertThat(published.market()).isEqualTo("1X2");
@@ -70,6 +74,7 @@ class ProviderAlphaControllerTest {
     ArgumentCaptor<StandardMessage> captor = ArgumentCaptor.forClass(StandardMessage.class);
     verify(messagePublisher).publish(captor.capture());
     StandardBetSettlementMessage published = (StandardBetSettlementMessage) captor.getValue();
+
     assertThat(published.eventId()).isEqualTo("ev123");
     assertThat(published.provider()).isEqualTo(FeedProviderId.PROVIDER_ALPHA);
     assertThat(published.market()).isEqualTo("1X2");
@@ -82,7 +87,9 @@ class ProviderAlphaControllerTest {
     mockMvc.perform(post("/provider-alpha/feed")
             .contentType(MediaType.APPLICATION_JSON)
             .content(fixture("missing-event-id.json")))
-        .andExpect(status().isBadRequest());
+        .andExpect(status().isBadRequest())
+        .andExpect(content().contentTypeCompatibleWith(MediaType.valueOf("application/problem+json")))
+        .andExpect(jsonPath("$.detail").value(not("")));
 
     verifyNoInteractions(messagePublisher);
   }
@@ -141,6 +148,7 @@ class ProviderAlphaControllerTest {
 
   private static String fixture(String fileName) throws Exception {
     ClassPathResource resource = new ClassPathResource("provider/alpha/" + fileName);
+
     return StreamUtils.copyToString(resource.getInputStream(), StandardCharsets.UTF_8);
   }
 }

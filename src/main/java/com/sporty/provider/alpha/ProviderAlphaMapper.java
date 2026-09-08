@@ -17,10 +17,10 @@ class ProviderAlphaMapper implements FeedProvider<ProviderAlphaMessage> {
   public StandardMessage standardize(ProviderAlphaMessage raw) {
     return switch (raw) {
       case ProviderAlphaOddsChangeRequest req -> new StandardOddsChangeMessage(
-          req.eventId(), FeedProviderId.PROVIDER_ALPHA, Instant.now(), "1X2",
+          req.eventId(), FeedProviderId.PROVIDER_ALPHA, Instant.now(), StandardMessage.MARKET_1X2,
           Map.of(Outcome.HOME, req.values().one(), Outcome.DRAW, req.values().draw(), Outcome.AWAY, req.values().two()));
       case ProviderAlphaSettlementRequest req -> new StandardBetSettlementMessage(
-          req.eventId(), FeedProviderId.PROVIDER_ALPHA, Instant.now(), "1X2", Outcome.fromCode(req.outcome()));
+          req.eventId(), FeedProviderId.PROVIDER_ALPHA, Instant.now(), StandardMessage.MARKET_1X2, Outcome.fromCode(req.outcome()));
     };
   }
 }

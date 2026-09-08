@@ -21,7 +21,9 @@ public class FeedErrorHandler extends ResponseEntityExceptionHandler {
     String detail = ex.getBindingResult().getFieldErrors().stream()
         .map(fieldError -> fieldError.getField() + " " + fieldError.getDefaultMessage())
         .collect(Collectors.joining("; "));
+
     ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, detail);
+
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(problemDetail);
   }
 
@@ -30,6 +32,7 @@ public class FeedErrorHandler extends ResponseEntityExceptionHandler {
       HttpMessageNotReadableException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
     ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
         HttpStatus.BAD_REQUEST, "Malformed request body or unrecognized message shape");
+
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(problemDetail);
   }
 }

@@ -50,6 +50,7 @@ class ProviderBetaControllerTest {
     ArgumentCaptor<StandardMessage> captor = ArgumentCaptor.forClass(StandardMessage.class);
     verify(messagePublisher).publish(captor.capture());
     StandardOddsChangeMessage published = (StandardOddsChangeMessage) captor.getValue();
+
     assertThat(published.eventId()).isEqualTo("ev456");
     assertThat(published.provider()).isEqualTo(FeedProviderId.PROVIDER_BETA);
     assertThat(published.market()).isEqualTo("1X2");
@@ -70,6 +71,7 @@ class ProviderBetaControllerTest {
     ArgumentCaptor<StandardMessage> captor = ArgumentCaptor.forClass(StandardMessage.class);
     verify(messagePublisher).publish(captor.capture());
     StandardBetSettlementMessage published = (StandardBetSettlementMessage) captor.getValue();
+
     assertThat(published.eventId()).isEqualTo("ev456");
     assertThat(published.provider()).isEqualTo(FeedProviderId.PROVIDER_BETA);
     assertThat(published.market()).isEqualTo("1X2");
@@ -141,6 +143,7 @@ class ProviderBetaControllerTest {
 
   private static String fixture(String fileName) throws Exception {
     ClassPathResource resource = new ClassPathResource("provider/beta/" + fileName);
+
     return StreamUtils.copyToString(resource.getInputStream(), StandardCharsets.UTF_8);
   }
 }

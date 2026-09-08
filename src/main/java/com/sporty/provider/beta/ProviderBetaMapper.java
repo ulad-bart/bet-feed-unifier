@@ -17,10 +17,10 @@ class ProviderBetaMapper implements FeedProvider<ProviderBetaMessage> {
   public StandardMessage standardize(ProviderBetaMessage raw) {
     return switch (raw) {
       case ProviderBetaOddsChangeRequest req -> new StandardOddsChangeMessage(
-          req.eventId(), FeedProviderId.PROVIDER_BETA, Instant.now(), "1X2",
+          req.eventId(), FeedProviderId.PROVIDER_BETA, Instant.now(), StandardMessage.MARKET_1X2,
           Map.of(Outcome.HOME, req.odds().home(), Outcome.DRAW, req.odds().draw(), Outcome.AWAY, req.odds().away()));
       case ProviderBetaSettlementRequest req -> new StandardBetSettlementMessage(
-          req.eventId(), FeedProviderId.PROVIDER_BETA, Instant.now(), "1X2", mapResult(req.result()));
+          req.eventId(), FeedProviderId.PROVIDER_BETA, Instant.now(), StandardMessage.MARKET_1X2, mapResult(req.result()));
     };
   }
 
