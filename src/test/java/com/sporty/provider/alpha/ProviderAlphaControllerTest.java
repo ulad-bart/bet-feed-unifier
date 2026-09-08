@@ -40,11 +40,6 @@ class ProviderAlphaControllerTest {
   @MockitoBean
   private MessagePublisher messagePublisher;
 
-  private static String fixture(String fileName) throws Exception {
-    ClassPathResource resource = new ClassPathResource("provider/alpha/" + fileName);
-    return StreamUtils.copyToString(resource.getInputStream(), StandardCharsets.UTF_8);
-  }
-
   @Test
   void oddsChangeRequest_returnsAcceptedAndPublishesStandardOddsChangeMessage() throws Exception {
     mockMvc.perform(post("/provider-alpha/feed")
@@ -142,5 +137,10 @@ class ProviderAlphaControllerTest {
         .andExpect(status().isAccepted());
 
     verify(messagePublisher, times(2)).publish(any());
+  }
+
+  private static String fixture(String fileName) throws Exception {
+    ClassPathResource resource = new ClassPathResource("provider/alpha/" + fileName);
+    return StreamUtils.copyToString(resource.getInputStream(), StandardCharsets.UTF_8);
   }
 }
