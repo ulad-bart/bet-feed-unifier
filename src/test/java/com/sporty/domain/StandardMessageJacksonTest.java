@@ -5,19 +5,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Map;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
 class StandardMessageJacksonTest {
 
-  private ObjectMapper objectMapper;
-
-  @BeforeEach
-  void setUp() {
-    objectMapper = new ObjectMapper();
-  }
+  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
   @Test
   void oddsChangeMessage_serializesMessageTypeAsOddsChange() throws Exception {
@@ -25,9 +19,9 @@ class StandardMessageJacksonTest {
         "ev123", FeedProviderId.PROVIDER_ALPHA, Instant.now(), "1X2",
         Map.of(Outcome.HOME, new BigDecimal("2.0")));
 
-    JsonNode json = objectMapper.readTree(objectMapper.writeValueAsString(message));
+    JsonNode json = OBJECT_MAPPER.readTree(OBJECT_MAPPER.writeValueAsString(message));
 
-    assertThat(json.get("messageType").asText()).isEqualTo("ODDS_CHANGE");
+    assertThat(json.get("messageType").asString()).isEqualTo("ODDS_CHANGE");
   }
 
   @Test
@@ -35,9 +29,9 @@ class StandardMessageJacksonTest {
     StandardBetSettlementMessage message = new StandardBetSettlementMessage(
         "ev123", FeedProviderId.PROVIDER_ALPHA, Instant.now(), "1X2", Outcome.HOME);
 
-    JsonNode json = objectMapper.readTree(objectMapper.writeValueAsString(message));
+    JsonNode json = OBJECT_MAPPER.readTree(OBJECT_MAPPER.writeValueAsString(message));
 
-    assertThat(json.get("messageType").asText()).isEqualTo("BET_SETTLEMENT");
+    assertThat(json.get("messageType").asString()).isEqualTo("BET_SETTLEMENT");
   }
 
   @Test
@@ -46,7 +40,7 @@ class StandardMessageJacksonTest {
         "ev123", FeedProviderId.PROVIDER_ALPHA, Instant.now(), "1X2",
         Map.of(Outcome.HOME, new BigDecimal("2.0"), Outcome.DRAW, new BigDecimal("3.1"), Outcome.AWAY, new BigDecimal("3.8")));
 
-    JsonNode odds = objectMapper.readTree(objectMapper.writeValueAsString(message)).get("odds");
+    JsonNode odds = OBJECT_MAPPER.readTree(OBJECT_MAPPER.writeValueAsString(message)).get("odds");
 
     assertThat(odds.has("1")).isTrue();
     assertThat(odds.has("X")).isTrue();
@@ -61,8 +55,8 @@ class StandardMessageJacksonTest {
     StandardBetSettlementMessage message = new StandardBetSettlementMessage(
         "ev123", FeedProviderId.PROVIDER_BETA, Instant.now(), "1X2", Outcome.AWAY);
 
-    JsonNode json = objectMapper.readTree(objectMapper.writeValueAsString(message));
+    JsonNode json = OBJECT_MAPPER.readTree(OBJECT_MAPPER.writeValueAsString(message));
 
-    assertThat(json.get("outcome").asText()).isEqualTo("2");
+    assertThat(json.get("outcome").asString()).isEqualTo("2");
   }
 }

@@ -90,6 +90,7 @@ Canonical outcome keys are always `"1"` / `"X"` / `"2"` (the 1X2 notation the br
 - `mvn clean verify` completes successfully — the project compiles and every unit test passes.
 - No test is disabled/skipped without a comment explaining why.
 - No unused imports, dead code, or commented-out code left behind.
+- No use of methods annotated `@Deprecated` in the project's dependencies (e.g. `JsonNode.asText()` in Jackson 3.x — use `asString()` instead). Verify against the actual library version in use before assuming a method is deprecated; IDE hints can be stale or wrong.
 
 ## PR invariants (must hold for every pull request)
 

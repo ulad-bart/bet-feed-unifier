@@ -1,0 +1,9 @@
+{
+  "type": "ODDS",
+  "event_id": "ev456",
+  "odds": {
+    "home": 1.95,
+    "draw": 3.2,
+    "away": 4.0
+  }
+}

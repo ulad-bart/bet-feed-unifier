@@ -18,8 +18,8 @@ import tools.jackson.databind.ObjectMapper;
 
 class LoggingMessagePublisherTest {
 
-  private final ObjectMapper objectMapper = new ObjectMapper();
-  private final LoggingMessagePublisher publisher = new LoggingMessagePublisher(objectMapper);
+  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+  private final LoggingMessagePublisher publisher = new LoggingMessagePublisher(OBJECT_MAPPER);
   private ListAppender<ILoggingEvent> appender;
   private Logger logger;
 
@@ -44,11 +44,11 @@ class LoggingMessagePublisherTest {
     publisher.publish(message);
 
     assertThat(appender.list).hasSize(1);
-    String logMessage = appender.list.get(0).getFormattedMessage();
+    String logMessage = appender.list.getFirst().getFormattedMessage();
     String json = logMessage.substring(logMessage.indexOf('{'));
-    JsonNode node = objectMapper.readTree(json);
-    assertThat(node.get("eventId").asText()).isEqualTo("ev123");
-    assertThat(node.get("messageType").asText()).isEqualTo("BET_SETTLEMENT");
-    assertThat(node.get("outcome").asText()).isEqualTo("1");
+    JsonNode node = OBJECT_MAPPER.readTree(json);
+    assertThat(node.get("eventId").asString()).isEqualTo("ev123");
+    assertThat(node.get("messageType").asString()).isEqualTo("BET_SETTLEMENT");
+    assertThat(node.get("outcome").asString()).isEqualTo("1");
   }
 }
