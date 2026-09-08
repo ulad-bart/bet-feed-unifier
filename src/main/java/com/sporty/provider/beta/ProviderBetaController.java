@@ -23,6 +23,7 @@ public class ProviderBetaController {
   public ResponseEntity<Void> ingest(@Valid @RequestBody ProviderBetaMessage message) {
     StandardMessage standardMessage = mapper.standardize(message);
     messagePublisher.publish(standardMessage);
+
     return ResponseEntity.accepted().build();
   }
 }

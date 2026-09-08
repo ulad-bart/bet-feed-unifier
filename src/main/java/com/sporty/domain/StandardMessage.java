@@ -10,6 +10,8 @@ import java.time.Instant;
     @JsonSubTypes.Type(value = StandardBetSettlementMessage.class, name = "BET_SETTLEMENT")
 })
 public sealed interface StandardMessage permits StandardOddsChangeMessage, StandardBetSettlementMessage {
+  String MARKET_1X2 = "1X2";
+
   String eventId();
 
   FeedProviderId provider();

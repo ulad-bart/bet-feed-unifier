@@ -6,5 +6,5 @@ import jakarta.validation.constraints.Pattern;
 
 record ProviderAlphaSettlementRequest(
     @NotBlank @JsonProperty("event_id") String eventId,
-    @NotBlank @Pattern(regexp = "^(1|X|2)$") @JsonProperty("outcome") String outcome
+    @NotBlank @Pattern(regexp = "^[1X2]$") @JsonProperty("outcome") String outcome
 ) implements ProviderAlphaMessage {}

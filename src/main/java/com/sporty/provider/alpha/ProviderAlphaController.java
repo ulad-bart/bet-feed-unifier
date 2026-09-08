@@ -23,6 +23,7 @@ public class ProviderAlphaController {
   public ResponseEntity<Void> ingest(@Valid @RequestBody ProviderAlphaMessage message) {
     StandardMessage standardMessage = mapper.standardize(message);
     messagePublisher.publish(standardMessage);
+
     return ResponseEntity.accepted().build();
   }
 }

@@ -47,6 +47,7 @@ class LoggingMessagePublisherTest {
     String logMessage = appender.list.getFirst().getFormattedMessage();
     String json = logMessage.substring(logMessage.indexOf('{'));
     JsonNode node = OBJECT_MAPPER.readTree(json);
+
     assertThat(node.get("eventId").asString()).isEqualTo("ev123");
     assertThat(node.get("messageType").asString()).isEqualTo("BET_SETTLEMENT");
     assertThat(node.get("outcome").asString()).isEqualTo("1");

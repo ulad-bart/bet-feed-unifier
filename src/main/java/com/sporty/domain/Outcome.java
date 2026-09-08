@@ -24,6 +24,7 @@ public enum Outcome {
         return outcome;
       }
     }
+
     throw new IllegalArgumentException("Unknown outcome code: " + code);
   }
 }
