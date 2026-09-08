@@ -97,3 +97,5 @@ Per-task execution plans are authored at execution time, not here — before wri
 - `./mvnw spring-boot:run` (and the packaged jar) starts the service; both endpoints respond identically.
 - Each README `curl` example produces the exact status code and, for `202` cases, the exact standardized-message shape shown in `requirements.md` § Example request/response.
 - `mvn clean verify` still passes (no regressions from packaging changes).
+
+**Execution result:** Done, with one caveat. `mvn clean verify` — BUILD SUCCESS, 30/30 tests. `./mvnw spring-boot:run` verified end-to-end: all four README `curl` examples returned `202 Accepted` with published-message log lines exactly matching `requirements.md`'s example shapes, and the invalid-odds example returned `400 Bad Request` / `application/problem+json`. The Docker path (`docker compose up --build`) was **not** executed — the Docker daemon isn't running in this environment — but `Dockerfile`/`docker-compose.yml` content was verified against the agreed plan. Branch: `feed-normalization/packaging-readme`.
