@@ -1,0 +1,13 @@
+target/
+*.class
+
+# IDE / local tooling
+.idea/
+*.iws
+*.iml
+*.ipr
+.vscode/
+.claude/
+
+# OS
+.DS_Store
