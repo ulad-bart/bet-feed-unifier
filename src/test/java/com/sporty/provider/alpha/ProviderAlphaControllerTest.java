@@ -34,7 +34,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.util.StreamUtils;
 
 @WebMvcTest(controllers = ProviderAlphaController.class)
-@Import(ProviderAlphaMapper.class)
+@Import(ProviderAlphaFeedNormalizer.class)
 class ProviderAlphaControllerTest {
 
   @Autowired

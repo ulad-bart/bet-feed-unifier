@@ -5,16 +5,16 @@ import com.sporty.domain.Outcome;
 import com.sporty.domain.StandardBetSettlementMessage;
 import com.sporty.domain.StandardMessage;
 import com.sporty.domain.StandardOddsChangeMessage;
-import com.sporty.provider.FeedProvider;
+import com.sporty.provider.FeedNormalizer;
 import java.time.Instant;
 import java.util.Map;
 import org.springframework.stereotype.Component;
 
 @Component
-class ProviderBetaMapper implements FeedProvider<ProviderBetaMessage> {
+class ProviderBetaFeedNormalizer implements FeedNormalizer<ProviderBetaMessage> {
 
   @Override
-  public StandardMessage standardize(ProviderBetaMessage raw) {
+  public StandardMessage normalize(ProviderBetaMessage raw) {
     return switch (raw) {
       case ProviderBetaOddsChangeRequest req -> new StandardOddsChangeMessage(
           req.eventId(), FeedProviderId.PROVIDER_BETA, Instant.now(), StandardMessage.MARKET_1X2,

@@ -10,16 +10,16 @@ import com.sporty.domain.StandardOddsChangeMessage;
 import java.math.BigDecimal;
 import org.junit.jupiter.api.Test;
 
-class ProviderAlphaMapperTest {
+class ProviderAlphaFeedNormalizerTest {
 
-  private final ProviderAlphaMapper mapper = new ProviderAlphaMapper();
+  private final ProviderAlphaFeedNormalizer normalizer = new ProviderAlphaFeedNormalizer();
 
   @Test
-  void standardize_oddsChangeRequest_mapsToStandardOddsChangeMessage() {
+  void normalize_oddsChangeRequest_mapsToStandardOddsChangeMessage() {
     ProviderAlphaOddsChangeRequest request = new ProviderAlphaOddsChangeRequest(
         "ev123", new ProviderAlphaOdds(new BigDecimal("2.0"), new BigDecimal("3.1"), new BigDecimal("3.8")));
 
-    StandardMessage result = mapper.standardize(request);
+    StandardMessage result = normalizer.normalize(request);
 
     assertThat(result).isInstanceOf(StandardOddsChangeMessage.class);
     StandardOddsChangeMessage oddsChange = (StandardOddsChangeMessage) result;
@@ -34,10 +34,10 @@ class ProviderAlphaMapperTest {
   }
 
   @Test
-  void standardize_settlementRequest_mapsToStandardBetSettlementMessage() {
+  void normalize_settlementRequest_mapsToStandardBetSettlementMessage() {
     ProviderAlphaSettlementRequest request = new ProviderAlphaSettlementRequest("ev123", "1");
 
-    StandardMessage result = mapper.standardize(request);
+    StandardMessage result = normalizer.normalize(request);
 
     assertThat(result).isInstanceOf(StandardBetSettlementMessage.class);
     StandardBetSettlementMessage settlement = (StandardBetSettlementMessage) result;
